@@ -145,35 +145,41 @@ Required Modules:
         "ojs/ojtable"
 
 
-      self.parseData = function(response) {
-        return {name: response['name'],
-            short_desc: response['short_desc']
+      var self = this;
+
+        // Setup the service URL
+        self.serviceURL = "https://apex.oracle.com/pls/apex/oraclejet/lp/activities/";
+
+        // Determine the structure/fields for the Model
+        self.parseData = function(response) {
+            return {name: response['name'], short_desc: response['short_desc']};
         };
-      };
 
-      self.serviceURL = "https://apex.oracle.com/pls/apex/oraclejet/lp/activities/";
-      self.Department = Model.Model.extend({
-              urlRoot: self.serviceURL,
-              parse: self.parseData,
-              idAttribute: 'id'
-          }); 
-      
-      self.DeptCol = ko.observable();
-      self.datasource = ko.observable();
-      self.myDept = new self.Department();
+        // Extend the model class for creating Department Model
+        self.Department = Model.Model.extend({
+            urlRoot: self.serviceURL,
+            parse: self.parseData,
+            idAttribute: 'id'
+        });
 
-      // Create a base object "class" for the entire dataset
-      self.DeptCollection = Model.Collection.extend({
-              url: self.serviceURL + "?limit=50",
-              model: self.myDept
-          });
+        // We create a Model object
+        self.myDept = new self.Department();
 
-      // Create a specific instance for the departments.  This will be filled with instances of the
-      // model "department" for each record when the data is retrieved from the data service
-      self.DeptCol(new self.DeptCollection());
+        // Extend the collection class 
+        self.DeptCollection = Model.Collection.extend({
+            url: self.serviceURL + "?limit=50",
+            model: self.myDept
+        });
 
-      
-      self.datasource(new CollectionDataProvider(self.DeptCol()));
+        // We create the collection object
+        self.DeptCol = ko.observable();
+        self.DeptCol(new self.DeptCollection());
+
+        // Connect the collection object to the table datasource
+        self.datasource = ko.observable();
+        self.datasource(new CollectionDataProvider(self.DeptCol()));
+        
+        
 
 CREATIVE LAB:
 -----------------------------------------------------------------------------------
